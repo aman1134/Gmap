@@ -126,6 +126,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         new LatLng(lastKnownLocation.getLatitude(),
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
 
+                                // Adding the marker to the current location
                                 BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.marker);
                                 MarkerOptions markerOptions = new MarkerOptions();
                                 markerOptions.position(new LatLng(lastKnownLocation.getLatitude(),
@@ -155,6 +156,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(currLocationMarker != null)
             currLocationMarker.remove();
 
+        // Adding the marker to the location where you clicked on the map
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( latLng , 17));
         BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.marker);
         MarkerOptions options = new MarkerOptions();
