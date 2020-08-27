@@ -12,11 +12,11 @@ import io.reactivex.Flowable;
 @Dao
 interface UserDao {
 
-    @Query("Select * from user where email like :email")
-    User checkEmail(String email);
-
-    @Query("select * from user")
+    @Query("Select * from user")
     Flowable<List<User>> getUsersList();
+
+    @Query("Select * from user where email like :email")
+    User getUser(String email);
 
     @Insert
     void insert(User user);

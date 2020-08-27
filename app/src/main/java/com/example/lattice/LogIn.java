@@ -1,11 +1,14 @@
 package com.example.lattice;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +17,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
@@ -55,11 +60,8 @@ public class LogIn extends AppCompatActivity {
                     Observable.fromCallable(() -> {
 
                         AppDatabase db = AppDatabase.getInstance(LogIn.this);
-                        User user = db.userDao().checkEmail(et_email.getText().toString());
-                        if(user != null && user.getPassword().equals(et_password.getText().toString())) {
-                            startActivity(new Intent(LogIn.this, DisplayUser.class));
-                        }
-                        else
+                        User user = db.userDao().getUser(et_email.getText().toString());
+                        if(user.getPassword().equals(et_password.getText().toString()))
                             return true;
                         return false;
                     })
@@ -68,12 +70,17 @@ public class LogIn extends AppCompatActivity {
                             .subscribe((result) -> {
                                 if(result)
                                     Toast.makeText(LogIn.this , "Entered email or password \nis incorrect" , Toast.LENGTH_SHORT).show();
+                                else{
+                                    SharedPreferences sharedPreferences = LogIn.this.getSharedPreferences("user" , MODE_PRIVATE);
+                                    sharedPreferences.edit().putBoolean("logged_in" , true).apply();
+                                }
                             });
 
                 }
             }
         });
     }
+
 
     public final static boolean isValidEmail(CharSequence target) {
         if (target == null) {

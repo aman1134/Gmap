@@ -174,6 +174,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 break;
 
             case R.id.done:
+                SignUp.location = new LatLng(lastKnownLocation.getLatitude() , lastKnownLocation.getLongitude());
+                SignUp.signup.setVisibility(View.VISIBLE);
+                finish();
                 Toast.makeText(this, "Your Location is recorded", Toast.LENGTH_SHORT).show();
                 break;
         }
