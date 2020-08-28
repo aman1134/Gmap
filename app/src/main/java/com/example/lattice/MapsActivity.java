@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -57,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+
         ImageView aim = (ImageView) findViewById(R.id.aim);
         ImageView done = (ImageView) findViewById(R.id.done);
         aim.setOnClickListener(this);
@@ -67,12 +69,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         checkLocaionPermission();
     }
 
+    private void addmarker(LatLng latLng) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                latLng, DEFAULT_ZOOM));
+
+        // Adding the marker to the current location
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.marker);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("YOU");
+        markerOptions.icon(icon);
+    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
         mMap.setOnMapClickListener(this);
+        Intent intent = getIntent();
+        double lat = intent.getDoubleExtra("lat", 0.0);
+        double lng = intent.getDoubleExtra("lng", 0.0);
+
+        if(lat != 0.0 && lng != 0.0){
+            addmarker(new LatLng(lat , lng));
+        }
         //Getting the current location of the device
         getDeviceLocation();
     }
@@ -176,6 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case R.id.done:
                 SignUp.location = new LatLng(lastKnownLocation.getLatitude() , lastKnownLocation.getLongitude());
                 SignUp.signup.setVisibility(View.VISIBLE);
+                System.out.println("\n latlng = "+ SignUp.location);
                 finish();
                 Toast.makeText(this, "Your Location is recorded", Toast.LENGTH_SHORT).show();
                 break;

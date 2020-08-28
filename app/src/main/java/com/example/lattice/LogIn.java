@@ -7,10 +7,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,6 +46,7 @@ public class LogIn extends AppCompatActivity {
         });
         signin = findViewById(R.id.login);
         signin.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("CheckResult")
             @Override
             public void onClick(View v) {
                 if(!isValidEmail(et_email.getText().toString())) {
@@ -62,8 +65,8 @@ public class LogIn extends AppCompatActivity {
                         AppDatabase db = AppDatabase.getInstance(LogIn.this);
                         User user = db.userDao().getUser(et_email.getText().toString());
                         if(user.getPassword().equals(et_password.getText().toString()))
-                            return true;
-                        return false;
+                            return false;
+                        return true;
                     })
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -73,8 +76,10 @@ public class LogIn extends AppCompatActivity {
                                 else{
                                     SharedPreferences sharedPreferences = LogIn.this.getSharedPreferences("user" , MODE_PRIVATE);
                                     sharedPreferences.edit().putBoolean("logged_in" , true).apply();
+                                    startActivity(new Intent(LogIn.this , DisplayUser.class));
                                 }
-                            });
+                            },
+                                    throwable -> Log.e("TAG", "Throwable " + throwable.getMessage()));
 
                 }
             }

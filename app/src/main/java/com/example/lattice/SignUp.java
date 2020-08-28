@@ -1,10 +1,17 @@
 package com.example.lattice;
 
 import androidx.appcompat.app.AppCompatActivity;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.schedulers.Schedulers;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -108,13 +115,45 @@ public class SignUp extends AppCompatActivity {
                 }
                 if(isValidPhone(phone) && isValidString(name , 4) && isValidString(address , 10 ) && isValidEmail(email) && isValidPassword(password) && location != null){
                     User user = new User(email, name, phone, address, password, location.latitude , location.longitude);
-                    String jsonString = user.toString();
-                    AppDatabase db = AppDatabase.getInstance(SignUp.this);
-                    db.userDao().insert(user);
-                    SharedPreferences sharedPreferences = SignUp.this.getSharedPreferences("user" , MODE_PRIVATE);
-                    sharedPreferences.edit().putBoolean("logged_in" , true).apply();
-                    Toast.makeText(SignUp.this , "You are logged in" , Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(SignUp.this , DisplayUser.class));
+
+
+                    class queryTask extends AsyncTask<Void, Boolean , Boolean> {
+                        Boolean flag = false;
+
+                        @Override
+                        protected Boolean doInBackground(Void... voids) {
+                            AppDatabase db = AppDatabase.getInstance(SignUp.this);
+                            Completable completable = db.userDao().insert(user);
+                            completable.doOnComplete(new Action() {
+                                @Override
+                                public void run() throws Exception {
+                                    flag = true;
+                                }
+                            });
+                            return flag;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Boolean flag){
+                            super.onPostExecute(flag);
+
+                            if(flag)
+                                Toast.makeText(SignUp.this , "this email exist" , Toast.LENGTH_SHORT).show();
+                            else{
+                                SharedPreferences sharedPreferences = SignUp.this.getSharedPreferences("user" , MODE_PRIVATE);
+                                sharedPreferences.edit().putBoolean("logged_in" , true).apply();
+                                Toast.makeText(SignUp.this , "You are Signed up" , Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(SignUp.this , DisplayUser.class));
+                                finish();
+                            }
+                        }
+
+
+                    }
+
+                    queryTask qTask = new queryTask();
+                    qTask.execute();
+
                 }
             }
         });
